@@ -4,8 +4,8 @@ import List from "./pages/list/List";
 import Product from "./pages/products/Product"
 import Single from "./pages/single/Single";
 import New from "./pages/new/New";
-import NewProduct from "./pages/newProduct/NewProduct";
-import UpdateProduct from "./pages/updateProduct/UpdateProduct";
+import NewProduct from "./pages/newProduct/NewProduct.tsx";
+import UpdateProduct from "./pages/updateProduct/UpdateProduct.tsx";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { productInputs, userInputs } from "./formSource";
 import "./style/dark.scss";
@@ -72,7 +72,7 @@ function App() {
                   <RequireAuth>
                   <Product />
                 </RequireAuth>}  />
-              <Route path=":productId"   element={
+              <Route path="/products/edit/:id"   element={
                   <RequireAuth>
                   <UpdateProduct title={"Editar Producto"} />
                 </RequireAuth>}  />
@@ -86,6 +86,7 @@ function App() {
                 
               }
               />
+              
             </Route>
           </Route>
         </Routes>
