@@ -1,17 +1,16 @@
 import { addDoc, collection } from "firebase/firestore";
 import { TextField, Snackbar } from "@mui/material";
 import { db } from "../../firebase";
-import "./new.scss";
+import "./newService.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
 import React, { useState } from "react";
-import { Product } from "../../Resources/producto";
+import { Service } from "../../Resources/servicio";
 
-const NewProduct = ({ title }: { title: string }) => {
+const NewService = ({ title }: { title: string }) => {
   const [nombre, setNombre] = useState("");
-  const [precioCompra, setPrecioCompra] = useState("");
+  const [costo, setCosto] = useState("");
   const [precioVenta, setPrecioVenta] = useState("");
-  const [stock, setStock] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [formError, setFormError] = useState(false);
 
@@ -19,49 +18,46 @@ const NewProduct = ({ title }: { title: string }) => {
     e.preventDefault();
 
     // Validar que todos los campos estén completos
-    if (!nombre || !precioCompra || !precioVenta || !stock) {
+    if (!nombre || !costo || !precioVenta) {
       setFormError(true);
       return;
     }
 
     // Validar los tipos de datos
-    const parsedPrecioCompra = parseFloat(precioCompra);
+    const parsedCosto = parseFloat(costo);
     const parsedPrecioVenta = parseFloat(precioVenta);
-    const parsedStock = parseInt(stock);
+    
 
     if (
-      isNaN(parsedPrecioCompra) ||
-      isNaN(parsedPrecioVenta) ||
-      isNaN(parsedStock)
+      isNaN(parsedCosto) ||
+      isNaN(parsedPrecioVenta) 
     ) {
       setFormError(true);
       return;
     }
 
     // Validar que el precio de venta sea mayor que el de compra
-    if (parsedPrecioVenta <= parsedPrecioCompra) {
+    if (parsedPrecioVenta <= parsedCosto) {
       setOpenSnackbar(true);
       return;
     }
 
-    const product: Product = {
+    const service: Service = {
       nombre,
-      precio_compra: parsedPrecioCompra,
+      costo: parsedCosto,
       precio_venta: parsedPrecioVenta,
-      stock: parsedStock,
     };
 
     try {
-      const docRef = await addDoc(collection(db, "products"), product);
-      console.log("Producto guardado con éxito:", docRef.id);
+      const docRef = await addDoc(collection(db, "services"), service);
+      console.log("Servicio guardado con éxito:", docRef.id);
 
       // Restablecer los campos del formulario
       setNombre("");
-      setPrecioCompra("");
+      setCosto("");
       setPrecioVenta("");
-      setStock("");
     } catch (error) {
-      console.log("Error al guardar el producto:", error);
+      console.log("Error al guardar el servicio:", error);
     }
 
     setFormError(false);
@@ -95,9 +91,9 @@ const NewProduct = ({ title }: { title: string }) => {
                 <TextField
                   color="primary"
                   focused
-                  label="Precio Compra"
+                  label="Costo"
                   margin="dense"
-                  onChange={(e) => setPrecioCompra(e.target.value)}
+                  onChange={(e) => setCosto(e.target.value)}
                 />
                 <TextField
                   color="primary"
@@ -108,15 +104,7 @@ const NewProduct = ({ title }: { title: string }) => {
                 />
               </div>
 
-              <TextField
-                margin="dense"
-                color="primary"
-                focused
-                label="Stock"
-                onChange={(e) => setStock(e.target.value)}
-              />
-
-              <button type="submit">Agregar Producto</button>
+              <button type="submit">Agregar Servicio</button>
             </form>
           </div>
         </div>
@@ -125,7 +113,7 @@ const NewProduct = ({ title }: { title: string }) => {
         open={openSnackbar}
         autoHideDuration={4000}
         onClose={handleSnackbarClose}
-        message="El precio de venta debe ser mayor que el de compra"
+        message="El precio de venta debe ser mayor al costo del servicio"
       />
       {formError && (
         <Snackbar
@@ -139,4 +127,4 @@ const NewProduct = ({ title }: { title: string }) => {
   );
 };
 
-export default NewProduct;
+export default NewService;

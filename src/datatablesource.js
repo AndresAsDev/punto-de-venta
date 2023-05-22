@@ -61,6 +61,29 @@ export const productsColumns = [
   }
 ];
 
+export const servicesColumns = [
+  { field: "id", headerName: "ID", width: 70 },
+  {
+    field: "nombre",
+    headerName: "Nombre",
+  },
+  {
+    field: "costo",
+    headerName: "Costo Servicio",
+    width: 230,
+  },
+
+  {
+    field: "precio_venta",
+    headerName: "Precio Venta",
+    width: 100,
+  },
+  
+];
+
+
+
+
 
 export const productsRows = [
   {
