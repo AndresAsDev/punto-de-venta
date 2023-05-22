@@ -6,14 +6,16 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
 import React, { useState } from "react";
 import { Product } from "../../Resources/producto";
+import useInputState from "../../hooks/useInputState.ts";
 
 const NewProduct = ({ title }: { title: string }) => {
-  const [nombre, setNombre] = useState("");
-  const [precioCompra, setPrecioCompra] = useState("");
-  const [precioVenta, setPrecioVenta] = useState("");
-  const [stock, setStock] = useState("");
+  const [nombre, handleChangeNombre, resetNombre] = useInputState("");
+  const [precioCompra, handleChangePrecioCompra, resetPrecioCompra] = useInputState("");
+  const [precioVenta, handleChangePrecioVenta, resetPrecioVenta] = useInputState("");
+  const [stock, handleChangeStock, resetStock] = useInputState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [formError, setFormError] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +40,11 @@ const NewProduct = ({ title }: { title: string }) => {
       return;
     }
 
+    if (/\d/.test(nombre)) {
+      setFormError(true);
+      return false;
+    }
+
     // Validar que el precio de venta sea mayor que el de compra
     if (parsedPrecioVenta <= parsedPrecioCompra) {
       setOpenSnackbar(true);
@@ -56,10 +63,12 @@ const NewProduct = ({ title }: { title: string }) => {
       console.log("Producto guardado con éxito:", docRef.id);
 
       // Restablecer los campos del formulario
-      setNombre("");
-      setPrecioCompra("");
-      setPrecioVenta("");
-      setStock("");
+      resetNombre();
+      resetPrecioCompra();
+      resetPrecioVenta();
+      resetStock();
+
+      setSuccessMessage("Producto guardado con éxito");
     } catch (error) {
       console.log("Error al guardar el producto:", error);
     }
@@ -85,7 +94,8 @@ const NewProduct = ({ title }: { title: string }) => {
               label="Nombre"
               color="primary"
               focused
-              onChange={(e) => setNombre(e.target.value)}
+              value={nombre}
+              onChange={handleChangeNombre}
               margin="dense"
             />
           </div>
@@ -96,15 +106,17 @@ const NewProduct = ({ title }: { title: string }) => {
                   color="primary"
                   focused
                   label="Precio Compra"
+                  value={precioCompra}
+                  onChange={handleChangePrecioCompra}
                   margin="dense"
-                  onChange={(e) => setPrecioCompra(e.target.value)}
                 />
                 <TextField
                   color="primary"
                   focused
                   margin="dense"
                   label="Precio Venta"
-                  onChange={(e) => setPrecioVenta(e.target.value)}
+                  value={precioVenta}
+                  onChange={handleChangePrecioVenta}
                 />
               </div>
 
@@ -113,7 +125,8 @@ const NewProduct = ({ title }: { title: string }) => {
                 color="primary"
                 focused
                 label="Stock"
-                onChange={(e) => setStock(e.target.value)}
+                value={stock}
+                onChange={handleChangeStock}
               />
 
               <button type="submit">Agregar Producto</button>
@@ -133,6 +146,17 @@ const NewProduct = ({ title }: { title: string }) => {
           autoHideDuration={4000}
           onClose={() => setFormError(false)}
           message="Por favor, completa todos los campos"
+        />
+      )}
+      {successMessage && (
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={4000}
+          onClose={() => setSuccessMessage("")}
+          message={successMessage}
+          ContentProps={{
+            sx: { backgroundColor: "#4caf50" },
+          }}
         />
       )}
     </div>

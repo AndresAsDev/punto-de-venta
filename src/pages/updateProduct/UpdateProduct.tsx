@@ -64,6 +64,11 @@ const UpdateProduct = () => {
       return false;
     }
 
+    if (/\d/.test(nombre)) {
+      setFormError(true);
+      return false;
+    }
+
     // Validar que los campos numéricos sean valores válidos
     if (
       isNaN(parseFloat(precioCompra)) ||

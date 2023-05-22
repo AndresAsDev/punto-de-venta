@@ -6,13 +6,15 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
 import React, { useState } from "react";
 import { Service } from "../../Resources/servicio";
+import useInputState from "../../hooks/useInputState.ts"; // Importar el custom hook
 
 const NewService = ({ title }: { title: string }) => {
-  const [nombre, setNombre] = useState("");
-  const [costo, setCosto] = useState("");
-  const [precioVenta, setPrecioVenta] = useState("");
+  const [nombre, setNombre, resetNombre] = useInputState("");
+  const [costo, setCosto, resetCosto] = useInputState("");
+  const [precioVenta, setPrecioVenta, resetPrecioVenta] = useInputState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [formError, setFormError] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,14 +28,15 @@ const NewService = ({ title }: { title: string }) => {
     // Validar los tipos de datos
     const parsedCosto = parseFloat(costo);
     const parsedPrecioVenta = parseFloat(precioVenta);
-    
 
-    if (
-      isNaN(parsedCosto) ||
-      isNaN(parsedPrecioVenta) 
-    ) {
+    if (isNaN(parsedCosto) || isNaN(parsedPrecioVenta)) {
       setFormError(true);
       return;
+    }
+
+    if (/\d/.test(nombre)) {
+      setFormError(true);
+      return false;
     }
 
     // Validar que el precio de venta sea mayor que el de compra
@@ -53,9 +56,10 @@ const NewService = ({ title }: { title: string }) => {
       console.log("Servicio guardado con éxito:", docRef.id);
 
       // Restablecer los campos del formulario
-      setNombre("");
-      setCosto("");
-      setPrecioVenta("");
+      resetNombre();
+      resetCosto();
+      resetPrecioVenta();
+      setSuccessMessage("El servicio se ha guardado correctamente");
     } catch (error) {
       console.log("Error al guardar el servicio:", error);
     }
@@ -81,7 +85,8 @@ const NewService = ({ title }: { title: string }) => {
               label="Nombre"
               color="primary"
               focused
-              onChange={(e) => setNombre(e.target.value)}
+              value={nombre}
+              onChange={setNombre}
               margin="dense"
             />
           </div>
@@ -93,14 +98,16 @@ const NewService = ({ title }: { title: string }) => {
                   focused
                   label="Costo"
                   margin="dense"
-                  onChange={(e) => setCosto(e.target.value)}
+                  value={costo}
+                  onChange={setCosto}
                 />
                 <TextField
                   color="primary"
                   focused
                   margin="dense"
                   label="Precio Venta"
-                  onChange={(e) => setPrecioVenta(e.target.value)}
+                  value={precioVenta}
+                  onChange={setPrecioVenta}
                 />
               </div>
 
@@ -121,6 +128,17 @@ const NewService = ({ title }: { title: string }) => {
           autoHideDuration={4000}
           onClose={() => setFormError(false)}
           message="Por favor, completa todos los campos"
+        />
+      )}
+      {successMessage && (
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={4000}
+          onClose={() => setSuccessMessage("")}
+          message={successMessage}
+          ContentProps={{
+            sx: { backgroundColor: "#4caf50" },
+          }}
         />
       )}
     </div>
