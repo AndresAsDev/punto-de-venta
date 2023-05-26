@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { collection, addDoc, doc, runTransaction, updateDoc, serverTimestamp } from 'firebase/firestore';
+import React, {useEffect, useState } from 'react';
+import { collection, addDoc, doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import {
   TextField,
   Snackbar,
@@ -19,6 +19,7 @@ import './newVenta.scss';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Navbar from '../../components/navbar/Navbar';
 import { getDocs } from 'firebase/firestore';
+import useSnackbar from '../../hooks/useSnackbar.ts';
 
 
 const NewSale = ({ title }) => {
@@ -29,10 +30,11 @@ const NewSale = ({ title }) => {
   const [selectedServicio, setSelectedServicio] = useState(null);
   const [cantidadServicio, setCantidadServicio] = useState(0);
   const [total, setTotal] = useState(0);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
   const [ventaItems, setVentaItems] = useState([]);
   const [updatedStockItems, setUpdatedStockItems] = useState([]);
+  const { open, message, showSnackbar, closeSnackbar } = useSnackbar();
+
+  
 
   useEffect(() => {
     // Cargar productos desde Firebase
@@ -95,9 +97,11 @@ const NewSale = ({ title }) => {
       const stockDisponible = selectedProducto.stock - productosAgregados.reduce((total, item) => total + item.cantidadProducto, 0);
       
       if (cantidadProducto <= stockDisponible) {
+        
         const existingItem = ventaItems.find((item) => item.producto && item.producto.id === selectedProducto.id);
   
         if (existingItem) {
+          
           const updatedItems = ventaItems.map((item) => {
             if (item.producto && item.producto.id === selectedProducto.id) {
               const updatedCantidad = item.cantidadProducto + cantidadProducto;
@@ -113,6 +117,7 @@ const NewSale = ({ title }) => {
   
           setVentaItems(updatedItems);
         } else {
+          
           const newItem = {
             producto: selectedProducto,
             cantidadProducto,
@@ -128,10 +133,12 @@ const NewSale = ({ title }) => {
         setSelectedProducto(null);
         setCantidadProducto(0);
       } else {
-        setOpenSnackbar(true);
+        showSnackbar("No hay stock suficiente")
+        
       }
     } else {
-      setOpenSnackbar(true);
+      
+      showSnackbar("Seleccione un producto o una cantidad mayor a 0");
     }
   };
   
@@ -172,13 +179,10 @@ const NewSale = ({ title }) => {
       setSelectedServicio(null);
       setCantidadServicio(0);
     } else {
-      setOpenSnackbar(true);
+      showSnackbar("Seleccione un servicio o una cantidad mayor a 0")
     }
   };
-  
-  
-
-  
+    
 
   const handleEliminarItem = (index) => {
     const deletedItem = ventaItems[index];
@@ -191,27 +195,6 @@ const NewSale = ({ title }) => {
       setUpdatedStockItems((prevItems) => [...prevItems, updatedItem]);
     }
   };
-
-  const restoreStock = async () => {
-    for (const item of updatedStockItems) {
-      try {
-        if (!isNaN(item.cantidadProducto) && item.cantidadProducto >= 0) { // Verificar si es un número válido y mayor o igual a 0
-          const productRef = doc(db, 'products', item.producto.id);
-          await runTransaction(db, async (transaction) => {
-            const productSnapshot = await transaction.get(productRef);
-            const updatedStock = productSnapshot.data().stock + item.cantidadProducto;
-            transaction.update(productRef, { stock: updatedStock });
-          });
-        } else {
-          console.error('Cantidad de producto no válida:', item.cantidadProducto);
-        }
-      } catch (error) {
-        console.error('Error al restaurar el stock del producto:', error);
-      }
-    }
-    setUpdatedStockItems([]);
-  };
-    
 
   useEffect(() => {
     const restoreStock = async () => {
@@ -237,7 +220,7 @@ const NewSale = ({ title }) => {
 
   const handleVenta = async () => {
     if (ventaItems.length === 0) {
-      setOpenSnackbar(true);
+      showSnackbar("No hay ningun producto o servicio en la lista")
       return;
     }
 
@@ -269,14 +252,16 @@ const NewSale = ({ title }) => {
       // Restablecer los campos del formulario
       setVentaItems([]);
       setTotal(0);
-      setSuccessMessage('Venta guardada con éxito');
+      showSnackbar("Venta exitosa")
     } catch (error) {
+      showSnackbar("Error al realizar la venta")
+
       console.error('Error al guardar la venta:', error);
     }
   };
 
   const handleSnackbarClose = () => {
-    setOpenSnackbar(false);
+    closeSnackbar();
   };
 
   return (
@@ -333,7 +318,6 @@ const NewSale = ({ title }) => {
                   setSelectedServicio(selectedServicio);
                 }}
               >
-                <option value="">Seleccione un servicio</option>
                 {servicios.map((servicio) => (
                   <MenuItem key={servicio.id} value={servicio.id}>
                     {servicio.nombre}
@@ -404,10 +388,10 @@ const NewSale = ({ title }) => {
         </div>
       </div>
       <Snackbar
-        open={openSnackbar}
+        open={open}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
-        message="Error al guardar la venta"
+        message={message}
       />
     </div>
   );
