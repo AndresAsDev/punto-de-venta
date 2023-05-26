@@ -15,7 +15,7 @@ import UpdateProduct from "./pages/updateProduct/UpdateProduct.tsx";
 import NewService from "./pages/newServicio/NewService.tsx";
 import UpdateService from "./pages/updateServicio/UpdateServicio.tsx";
 
-import NewSale from "./pages/ventas/NewSale";
+import NewSale from "./pages/newSale/NewSale.jsx";
 import SaleItem from "./pages/ventas/SaleItem";
 import Venta from "./pages/venta/Venta";
 
@@ -125,23 +125,27 @@ function App() {
                 }
               />
             </Route>
-            <Route
-              path="ventas"
-              element={
-                <RequireAuth>
-                  <Venta />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="newSale"
-              element={
-                <RequireAuth>
-                  <NewSale  />
-                </RequireAuth>
-              }
-            />
-            <Route
+            <Route path="sales">
+              <Route
+                index
+                element={
+                  <RequireAuth>
+                    <Venta />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="newSale"
+                element={
+                  <RequireAuth>
+                    <NewSale
+                     
+                      title="Agregar Nueva Venta"
+                    />
+                  </RequireAuth>
+                }
+              />
+              <Route
               path="saleItem"
               element={
                 <RequireAuth>
@@ -149,6 +153,8 @@ function App() {
                 </RequireAuth>
               }
             />
+            </Route>  
+            
           </Route>
         </Routes>
       </BrowserRouter>

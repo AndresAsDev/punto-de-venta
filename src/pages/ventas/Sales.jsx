@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase";
 import SaleItem from "./SaleItem";
+import { Link } from "react-router-dom";
+import "./sales.scss"
+
+
 import {
   Table,
   TableContainer,
@@ -45,8 +49,15 @@ const Sales = () => {
   };
 
   return (
+  
     <div>
-      <h1>Ventas</h1>
+      
+      <div className="datatableTitle">
+        Agregar Ventas
+        <Link to="/sales/newSale" className="link">
+          Nuevo
+        </Link>
+      </div>
       {sales.length > 0 ? (
         <TableContainer>
           <Table>
